@@ -1,6 +1,10 @@
 pub enum Method {
+    OPTIONS,
     GET,
+    HEAD,
     POST,
-    UPDATE,
+    PUT,
     DELETE,
+    TRACE,
+    CONNECT,
 }
