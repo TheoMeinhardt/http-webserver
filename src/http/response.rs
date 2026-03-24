@@ -1,9 +1,10 @@
 use std::{
     io::{BufWriter, Write},
     net::{Shutdown, TcpStream},
+    time::SystemTime,
 };
 
-use crate::http::Headers;
+use crate::http::{HeaderName, HeaderValue, Headers};
 
 pub struct Response {
     http_version: String,
@@ -27,7 +28,7 @@ impl Response {
         }
     }
 
-    pub fn send(self, stream: &mut TcpStream) -> () {
+    pub fn send(mut self, stream: &mut TcpStream) -> () {
         let mut writer = BufWriter::new(stream);
 
         // write HTTP status line to BufWriter,
@@ -41,6 +42,12 @@ impl Response {
                 .as_bytes(),
             )
             .expect("Failed to write to Stream!");
+
+        // add `date` header with current http-date as a value
+        self.headers.insert_single_value(
+            HeaderName::new("date"),
+            HeaderValue::from(httpdate::fmt_http_date(SystemTime::now()).as_str()),
+        );
 
         // write headers to BufWriter,
         // i.e. connection: close
