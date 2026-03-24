@@ -44,7 +44,7 @@ impl Response {
             .expect("Failed to write to Stream!");
 
         // add `date` header with current http-date as a value
-        self.headers.insert_single_value(
+        self.headers.set_single_value(
             HeaderName::new("date"),
             HeaderValue::from(httpdate::fmt_http_date(SystemTime::now()).as_str()),
         );
@@ -62,4 +62,6 @@ impl Response {
             .shutdown(Shutdown::Both)
             .expect("Failed to shutdown Stream!");
     }
+
+    fn set_default_headers(mut self) {}
 }

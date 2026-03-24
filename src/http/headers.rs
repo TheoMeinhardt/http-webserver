@@ -35,11 +35,11 @@ impl Headers {
         }
     }
 
-    pub fn insert(&mut self, name: HeaderName, value: Vec<HeaderValue>) {
+    pub fn set(&mut self, name: HeaderName, value: Vec<HeaderValue>) {
         self.inner.insert(name, value);
     }
 
-    pub fn insert_single_value(&mut self, name: HeaderName, value: HeaderValue) {
+    pub fn set_single_value(&mut self, name: HeaderName, value: HeaderValue) {
         self.inner.insert(name, vec![value]);
     }
 
