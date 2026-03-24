@@ -25,10 +25,7 @@ impl Server {
             // println!("Handeling {}", stream.unwrap().local_addr().unwrap().ip());
 
             let mut headers = Headers::new();
-            headers.insert(
-                HeaderName::new("Connection"),
-                vec![HeaderValue::from("close")],
-            );
+            headers.insert_single_value(HeaderName::new("Connection"), HeaderValue::from("close"));
 
             let res = Response::new(String::from("HTTP/1.1"), 200, String::from("Ok"), headers);
             res.send(&mut stream.unwrap());
