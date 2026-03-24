@@ -1,3 +1,4 @@
+use crate::http::{HeaderName, HeaderValue, Headers, Response};
 use std::net::TcpListener;
 
 pub struct Server {
@@ -21,7 +22,16 @@ impl Server {
     // Starts listening for incoming connections.
     pub fn listen(self) {
         for stream in self.listener.incoming() {
-            println!("Handeling {}", stream.unwrap().local_addr().unwrap().ip());
+            // println!("Handeling {}", stream.unwrap().local_addr().unwrap().ip());
+
+            let mut headers = Headers::new();
+            headers.insert(
+                HeaderName::new("Connection"),
+                vec![HeaderValue::from("close")],
+            );
+
+            let res = Response::new(String::from("HTTP/1.1"), 200, String::from("Ok"), headers);
+            res.send(&mut stream.unwrap());
         }
     }
 }
