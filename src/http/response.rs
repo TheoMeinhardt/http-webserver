@@ -43,11 +43,10 @@ impl Response {
             )
             .expect("Failed to write to Stream!");
 
-        // add `date` header with current http-date as a value
-        self.headers.set_single_value(
-            HeaderName::new("date"),
-            HeaderValue::from(httpdate::fmt_http_date(SystemTime::now()).as_str()),
-        );
+        // set a few default headers and
+        // the date header
+        self.set_default_headers();
+        self.set_date_header();
 
         // write headers to BufWriter,
         // i.e. connection: close
@@ -63,5 +62,31 @@ impl Response {
             .expect("Failed to shutdown Stream!");
     }
 
-    fn set_default_headers(mut self) {}
+    fn set_default_headers(&mut self) {
+        self.headers.set_single_value(
+            HeaderName::new("X-Content-Type-Options"),
+            HeaderValue::from("nosniff"),
+        );
+        self.headers.set_single_value(
+            HeaderName::new("X-Frame-Options"),
+            HeaderValue::from("deny"),
+        );
+        self.headers
+            .set_single_value(HeaderName::new("X-XSS-Protection"), HeaderValue::from("0"));
+        self.headers.set_single_value(
+            HeaderName::new("Referrer-Policy"),
+            HeaderValue::from("no-referrer-when-downgrade"),
+        );
+        self.headers.set_single_value(
+            HeaderName::new("Content-Security-Policy"),
+            HeaderValue::from("default-src 'self'"),
+        );
+    }
+
+    fn set_date_header(&mut self) {
+        self.headers.set_single_value(
+            HeaderName::new("date"),
+            HeaderValue::from(httpdate::fmt_http_date(SystemTime::now()).as_str()),
+        );
+    }
 }
