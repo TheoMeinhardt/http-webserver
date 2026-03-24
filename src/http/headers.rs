@@ -39,6 +39,10 @@ impl Headers {
         self.inner.insert(name, value);
     }
 
+    pub fn insert_single_value(&mut self, name: HeaderName, value: HeaderValue) {
+        self.inner.insert(name, vec![value]);
+    }
+
     pub fn get_all(&self) -> &HashMap<HeaderName, Vec<HeaderValue>> {
         &self.inner
     }
