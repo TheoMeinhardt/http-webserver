@@ -66,6 +66,7 @@ impl Headers {
                         .expect("Failed to parse bytes to characters!")
                         .as_str(),
                 );
+                result.push_str("\n");
 
                 continue;
             }
