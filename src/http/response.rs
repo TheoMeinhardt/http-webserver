@@ -1,3 +1,4 @@
+use httpstatus::StatusCode;
 use std::{
     io::{BufWriter, Write},
     net::{Shutdown, TcpStream},
@@ -9,21 +10,16 @@ use crate::http::{HeaderName, HeaderValue, Headers};
 pub struct Response {
     http_version: String,
     status_code: u16,
-    reason_phrase: String,
+    status: StatusCode,
     headers: Headers,
 }
 
 impl Response {
-    pub fn new(
-        http_version: String,
-        status_code: u16,
-        reason_phrase: String,
-        headers: Headers,
-    ) -> Self {
+    pub fn new(http_version: String, status: StatusCode, headers: Headers) -> Self {
         Response {
             http_version,
-            status_code,
-            reason_phrase,
+            status_code: status.as_u16(),
+            status,
             headers,
         }
     }
@@ -34,13 +30,7 @@ impl Response {
         // write HTTP status line to BufWriter,
         // i.e. HTTP/1.1 200 Ok
         writer
-            .write_all(
-                format!(
-                    "{} {} {}\r\n",
-                    self.http_version, self.status_code, self.reason_phrase
-                )
-                .as_bytes(),
-            )
+            .write_all(format!("{} {}\r\n", self.http_version, self.status.to_string()).as_bytes())
             .expect("Failed to write to Stream!");
 
         // set a few default headers and

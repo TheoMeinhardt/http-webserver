@@ -1,4 +1,5 @@
 use crate::http::{HeaderName, HeaderValue, Headers, Response};
+use httpstatus::StatusCode;
 use std::net::TcpListener;
 
 pub struct Server {
@@ -27,7 +28,7 @@ impl Server {
             let mut headers = Headers::new();
             headers.set_single_value(HeaderName::new("Connection"), HeaderValue::from("close"));
 
-            let res = Response::new(String::from("HTTP/1.1"), 200, String::from("Ok"), headers);
+            let res = Response::new(String::from("HTTP/1.1"), StatusCode::Ok, headers);
             res.send(&mut stream.unwrap());
         }
     }
