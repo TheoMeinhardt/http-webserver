@@ -1,3 +1,4 @@
+use console::Style;
 use httpstatus::StatusCode;
 use std::{
     io::{BufWriter, Write},
@@ -9,7 +10,6 @@ use crate::http::{HeaderName, HeaderValue, Headers};
 
 pub struct Response {
     http_version: String,
-    status_code: u16,
     status: StatusCode,
     headers: Headers,
 }
@@ -18,7 +18,6 @@ impl Response {
     pub fn new(http_version: String, status: StatusCode, headers: Headers) -> Self {
         Response {
             http_version,
-            status_code: status.as_u16(),
             status,
             headers,
         }
@@ -46,10 +45,35 @@ impl Response {
 
         writer.flush().expect("Failed to flush BufWriter!");
 
+        self.log(&writer.get_ref().peer_addr().unwrap().to_string());
+
         writer
             .get_mut()
             .shutdown(Shutdown::Both)
             .expect("Failed to shutdown Stream!");
+    }
+
+    fn log(&self, target: &String) {
+        let col = match &self.status.as_u16() {
+            100..=199 => Style::new().fg(console::Color::White),
+            200..=299 => Style::new()
+                .bg(console::Color::TrueColor(0, 168, 107))
+                .fg(console::Color::TrueColor(0, 0, 0)),
+            300..=399 => Style::new()
+                .bg(console::Color::TrueColor(220, 220, 220))
+                .fg(console::Color::Black),
+            400..=499 => Style::new()
+                .bg(console::Color::White)
+                .fg(console::Color::Black),
+            500..=599 => Style::new().bg(console::Color::TrueColor(220, 29, 19)),
+            _ => Style::new().white(),
+        };
+
+        println!(
+            "sent {} to {}",
+            col.apply_to(self.status.to_string()),
+            target
+        );
     }
 
     fn set_default_headers(&mut self) {
