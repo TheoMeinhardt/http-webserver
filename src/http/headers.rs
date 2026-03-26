@@ -8,7 +8,25 @@ pub struct HeaderValue(Vec<u8>);
 
 impl HeaderName {
     pub fn new(name: &str) -> Self {
-        Self(name.to_ascii_lowercase())
+        let mut name_fmt = String::new();
+
+        // Be true on init so the first letter is capitalized too.
+        let mut prev_char_is_dash = true;
+        for c in name.chars() {
+            if prev_char_is_dash {
+                name_fmt.push(c.to_ascii_uppercase());
+            } else {
+                name_fmt.push(c.to_ascii_lowercase());
+            }
+
+            if c == '-' {
+                prev_char_is_dash = true;
+            } else {
+                prev_char_is_dash = false;
+            }
+        }
+
+        Self(name_fmt)
     }
 }
 
