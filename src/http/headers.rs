@@ -1,4 +1,5 @@
 pub mod connection;
+pub mod content_type;
 
 use std::collections::HashMap;
 
