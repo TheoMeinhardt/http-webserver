@@ -37,4 +37,12 @@ impl Body {
 
         result
     }
+
+    pub fn len(&self) -> usize {
+        if self.is_empty() {
+            return 0;
+        }
+
+        return self.content.as_bytes().len();
+    }
 }

@@ -40,7 +40,7 @@ impl Response {
         self.set_default_headers();
         self.set_date_header();
         if !self.body.is_empty() {
-            self.set_content_type_header(self.body.get_content_type().to_string());
+            self.set_body_headers();
         }
 
         // write headers to BufWriter,
@@ -116,10 +116,17 @@ impl Response {
         );
     }
 
-    fn set_content_type_header(&mut self, content_type: String) {
+    fn set_body_headers(&mut self) {
+        let content_type = HeaderValue::from(self.body.get_content_type().to_string().as_str());
+        let content_len = HeaderValue::from(self.body.len().to_string().as_str());
+
         self.headers.set_single_value(
             HeaderName::new("content-type"),
-            HeaderValue::from(content_type.as_str()),
+            HeaderValue::from(content_type),
+        );
+        self.headers.set_single_value(
+            HeaderName::new("content-length"),
+            HeaderValue::from(content_len),
         );
     }
 }
