@@ -1,4 +1,4 @@
-use crate::http::{HeaderName, HeaderValue, Headers, Response};
+use crate::http::{Body, HeaderName, HeaderValue, Headers, Response, content_type::ContentType};
 use httpstatus::StatusCode;
 use std::net::TcpListener;
 
@@ -28,7 +28,15 @@ impl Server {
             let mut headers = Headers::new();
             headers.set_single_value(HeaderName::new("Connection"), HeaderValue::from("close"));
 
-            let res = Response::new(String::from("HTTP/1.1"), StatusCode::Ok, headers);
+            let res = Response::new(
+                String::from("HTTP/1.1"),
+                StatusCode::Ok,
+                headers,
+                Body::new(
+                    ContentType::TextHtml,
+                    String::from("<!DOCTYPE html><html><body><h3>Hello HTML!</h3></body></html>"),
+                ),
+            );
             res.send(&mut stream.unwrap());
         }
     }

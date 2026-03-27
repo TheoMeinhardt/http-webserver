@@ -6,20 +6,22 @@ use std::{
     time::SystemTime,
 };
 
-use crate::http::{HeaderName, HeaderValue, Headers};
+use crate::http::{Body, HeaderName, HeaderValue, Headers, content_type::ContentType};
 
 pub struct Response {
     http_version: String,
     status: StatusCode,
     headers: Headers,
+    body: Body,
 }
 
 impl Response {
-    pub fn new(http_version: String, status: StatusCode, headers: Headers) -> Self {
+    pub fn new(http_version: String, status: StatusCode, headers: Headers, body: Body) -> Self {
         Response {
             http_version,
             status,
             headers,
+            body,
         }
     }
 
@@ -32,16 +34,26 @@ impl Response {
             .write_all(format!("{} {}\r\n", self.http_version, self.status.to_string()).as_bytes())
             .expect("Failed to write to Stream!");
 
-        // set a few default headers and
-        // the date header
+        // set a few default headers,
+        // the date header and the content-type header,
+        // if body is not empty.
         self.set_default_headers();
         self.set_date_header();
+        if !self.body.is_empty() {
+            self.set_content_type_header(self.body.get_content_type().to_string());
+        }
 
         // write headers to BufWriter,
         // i.e. connection: close
         writer
             .write_all(self.headers.encode().as_bytes())
-            .expect("Failed to write to Stream!");
+            .expect("Failed to write Headers to Stream!");
+
+        // write body to BufWriter
+        // `Body::encode` automatically takes care of the empty line
+        writer
+            .write_all(self.body.encode().as_bytes())
+            .expect("Failed to write body to Stream!");
 
         writer.flush().expect("Failed to flush BufWriter!");
 
@@ -101,6 +113,13 @@ impl Response {
         self.headers.set_single_value(
             HeaderName::new("date"),
             HeaderValue::from(httpdate::fmt_http_date(SystemTime::now()).as_str()),
+        );
+    }
+
+    fn set_content_type_header(&mut self, content_type: String) {
+        self.headers.set_single_value(
+            HeaderName::new("content-type"),
+            HeaderValue::from(content_type.as_str()),
         );
     }
 }
